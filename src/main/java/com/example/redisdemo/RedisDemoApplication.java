@@ -13,6 +13,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @SpringBootApplication
@@ -36,16 +38,18 @@ public class RedisDemoApplication implements CommandLineRunner
     @Override
     public void run(String... args) {
 
-        RedisTemplate redisTemplate = (RedisTemplate) applicationContext.getBean("redisTemplate");
-
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        String key = "test_key_redisTemplate";
-        valueOperations.set(key, "test_value");
-
-        LOGGER.info("RediDemoApplication is started and the key '{}' is stored in Redis Server", key);
+//        RedisTemplate redisTemplate = (RedisTemplate) applicationContext.getBean("redisTemplate");
+//
+//        ValueOperations valueOperations = redisTemplate.opsForValue();
+//        String key = "test_key_redisTemplate";
+//        valueOperations.set(key, "test_value");
+//
+//        LOGGER.info("RediDemoApplication is started and the key '{}' is stored in Redis Server", key);
 
         //getNumberWithCacheable();
-        getNumberWithCacheManager();
+        //getNumberWithCacheManager();
+        saveNumbersUsingTransaction();
+        saveNumbersUsingTransactionWithAnnotation();
     }
 
     private void getNumberWithCacheable()
@@ -69,6 +73,37 @@ public class RedisDemoApplication implements CommandLineRunner
 
             LOGGER.info("Method: getNumberWithCacheManager is called with parameter: " + n);
             LOGGER.info("Result: " + redisService.getNumberWithCacheManager(n));
+        }
+    }
+
+    private void saveNumbersUsingTransaction()
+    {
+        List<Integer> numbers = new ArrayList<>();
+        Random r = new Random();
+        for (int i = 0; i < 5; i++)
+        {
+            numbers.add(r.nextInt(6));
+        }
+        LOGGER.info("Method: saveNumbersUsingTransaction is called with parameter: " + numbers);
+        redisService.saveNumbersUsingTransaction(numbers);
+    }
+
+    private void saveNumbersUsingTransactionWithAnnotation()
+    {
+        List<Integer> numbers = new ArrayList<>();
+        Random r = new Random();
+        for (int i = 0; i < 5; i++)
+        {
+            numbers.add(r.nextInt(6));
+        }
+        LOGGER.info("Method: saveNumbersUsingTransactionWithAnnotation is called with parameter: " + numbers);
+        try
+        {
+            redisService.saveNumbersUsingTransactionWithAnnotation(numbers);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Exception occurred: " + e.getMessage());
         }
     }
 }
